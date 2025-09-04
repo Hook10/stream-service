@@ -1,118 +1,84 @@
 package io.kas.streamservice.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.kas.streamservice.dto.event.BookEvent;
 import io.kas.streamservice.dto.event.PromoEvent;
+import io.kas.streamservice.dto.event.PromoInfo;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
-import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomSerdes {
 
   private static final ObjectMapper objectMapper = new ObjectMapper()
       .registerModule(new JavaTimeModule());
 
-  public static Serde<BookEvent> bookEventSerde() {
-    return new Serde<BookEvent>() {
-      @Override
-      public Serializer<BookEvent> serializer() {
-        return new Serializer<BookEvent>() {
-          @Override
-          public void configure(Map<String, ?> configs, boolean isKey) {}
-
-          @Override
-          public byte[] serialize(String topic, BookEvent data) {
-            try {
-              return objectMapper.writeValueAsBytes(data);
-            } catch (IOException e) {
-              throw new RuntimeException("Error serializing BookEvent", e);
-            }
-          }
-
-          @Override
-          public void close() {}
-        };
+  public static Serde<List<PromoInfo>> promoInfoListSerde() {
+    Serializer<List<PromoInfo>> serializer = (topic, data) -> {
+      try {
+        return data == null ? null : objectMapper.writeValueAsBytes(data);
+      } catch (Exception e) {
+        throw new RuntimeException("Error serializing PromoInfo list", e);
       }
-
-      @Override
-      public Deserializer<BookEvent> deserializer() {
-        return new Deserializer<BookEvent>() {
-          @Override
-          public void configure(Map<String, ?> configs, boolean isKey) {}
-
-          @Override
-          public BookEvent deserialize(String topic, byte[] data) {
-            try {
-              return objectMapper.readValue(data, BookEvent.class);
-            } catch (IOException e) {
-              throw new RuntimeException("Error deserializing BookEvent", e);
-            }
-          }
-
-          @Override
-          public void close() {}
-        };
-      }
-
-      @Override
-      public void configure(Map<String, ?> configs, boolean isKey) {}
-
-      @Override
-      public void close() {}
     };
+
+    Deserializer<List<PromoInfo>> deserializer = (topic, data) -> {
+      try {
+        if (data == null) return new ArrayList<>();
+        return objectMapper.readValue(data, new TypeReference<List<PromoInfo>>() {});
+      } catch (Exception e) {
+        throw new RuntimeException("Error deserializing PromoInfo list", e);
+      }
+    };
+
+    return Serdes.serdeFrom(serializer, deserializer);
+  }
+
+  public static Serde<BookEvent> bookEventSerde() {
+    Serializer<BookEvent> serializer = (topic, data) -> {
+      try {
+        return data == null ? null : objectMapper.writeValueAsBytes(data);
+      } catch (Exception e) {
+        throw new RuntimeException("Error serializing BookEvent", e);
+      }
+    };
+
+    Deserializer<BookEvent> deserializer = (topic, data) -> {
+      try {
+        if (data == null) return null;
+        return objectMapper.readValue(data, BookEvent.class);
+      } catch (Exception e) {
+        throw new RuntimeException("Error deserializing BookEvent", e);
+      }
+    };
+
+    return Serdes.serdeFrom(serializer, deserializer);
   }
 
   public static Serde<PromoEvent> promoEventSerde() {
-    return new Serde<PromoEvent>() {
-      @Override
-      public Serializer<PromoEvent> serializer() {
-        return new Serializer<PromoEvent>() {
-          @Override
-          public void configure(Map<String, ?> configs, boolean isKey) {}
-
-          @Override
-          public byte[] serialize(String topic, PromoEvent data) {
-            try {
-              return objectMapper.writeValueAsBytes(data);
-            } catch (IOException e) {
-              throw new RuntimeException("Error serializing PromoEvent", e);
-            }
-          }
-
-          @Override
-          public void close() {}
-        };
+    Serializer<PromoEvent> serializer = (topic, data) -> {
+      try {
+        return data == null ? null : objectMapper.writeValueAsBytes(data);
+      } catch (Exception e) {
+        throw new RuntimeException("Error serializing PromoEvent", e);
       }
-
-      @Override
-      public Deserializer<PromoEvent> deserializer() {
-        return new Deserializer<PromoEvent>() {
-          @Override
-          public void configure(Map<String, ?> configs, boolean isKey) {}
-
-          @Override
-          public PromoEvent deserialize(String topic, byte[] data) {
-            try {
-              return objectMapper.readValue(data, PromoEvent.class);
-            } catch (IOException e) {
-              throw new RuntimeException("Error deserializing PromoEvent", e);
-            }
-          }
-
-          @Override
-          public void close() {}
-        };
-      }
-
-      @Override
-      public void configure(Map<String, ?> configs, boolean isKey) {}
-
-      @Override
-      public void close() {}
     };
+
+    Deserializer<PromoEvent> deserializer = (topic, data) -> {
+      try {
+        if (data == null) return null;
+        return objectMapper.readValue(data, PromoEvent.class);
+      } catch (Exception e) {
+        throw new RuntimeException("Error deserializing PromoEvent", e);
+      }
+    };
+
+    return Serdes.serdeFrom(serializer, deserializer);
   }
 }

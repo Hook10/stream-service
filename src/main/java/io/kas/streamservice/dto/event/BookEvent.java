@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class BookEvent {
     private String language;
     private Integer pageCount;
     private BigDecimal price;
+    private List<PromoInfo> activePromos = new ArrayList<>();
     private Integer discount;
     private String status;
     private Instant timestamp;
