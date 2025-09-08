@@ -42,7 +42,10 @@ public class BookProcessor implements Processor<String, BookEvent, String, BookE
 
     bookEvent.getPayload().setActivePromos(promos != null ? promos : new ArrayList<>());
     bookEvent.getPayload().setDiscount(maxDiscount);
-
+    log.info("Book event after applying promos: {}", bookEvent);
+    promoStore.put(bookId, bookEvent.getPayload().getActivePromos());
+    bookEventStore.put(bookId, bookEvent);
+          
     context.forward(record.withValue(bookEvent));
   }
 
